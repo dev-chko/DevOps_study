@@ -1,0 +1,22 @@
+ec2-user ( amazon2 ami) docker 설치
+
+sudo yum install -y docker.io
+docker ps -a 	#스타트 확인
+sudo systemctl start docker #docker start
+sudo setfacl -m user:ec2-user:rw /var/run/docker.sock 	#권한 설정
+
+####
+Jira 설치
+기존 컨테이너 삭제
+docker rm --volumes --force "jira-container"
+지라 도커 컨테이너 설치
+docker pull cptactionhank/atlassian-jira-software
+컨테이너 생성
+docker create --restart=no --name "jira-container" \
+--publish "8080:8080" \
+--volume "hostpath:/var/atlassian/jira" \
+--env "CATALINA_OPTS= -Xms1024m -Xmx1024m -Datlassian.plugins.enable.wait=300" \
+cptactionhank/atlassian-jira-software
+
+실행
+docker start --attach "
