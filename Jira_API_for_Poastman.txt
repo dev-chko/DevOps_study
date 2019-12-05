@@ -1,0 +1,55 @@
+https://docs.atlassian.com/software/jira/docs/api/REST/8.5.1/#api/2/issue-createIssue
+
+postman 이용시
+파라메터 선택후
+Authorization : basic Auth
+Username : ryan
+Password : pass
+
+
+Get issue 
+GET /rest/api/2/issue/STUD-2
+Headers
+Key : Content_Type
+Value: application/json
+
+Create Issue
+POST /rest/api/2/issue
+Headers
+Key : Content_Type
+Value: application/json
+Body
+Json Type
+{
+
+    "fields": {
+
+	"project": {
+
+         	    "id": "10000"
+
+	    },
+
+            "summary": "something's wrong",
+
+            "issuetype": {
+
+                "id": "10005"
+
+            },
+
+            "assignee": {
+
+                "name": "ryan"
+
+            },
+
+            "reporter": {
+
+                "name": "ryan"
+
+            }
+
+    }
+
+}
