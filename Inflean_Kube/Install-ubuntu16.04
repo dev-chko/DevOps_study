@@ -1,0 +1,18 @@
+Install Kubernets for ubuntu16.04
+
+1. add apt-key sudo apt install apt-transport-https curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+
+2. add Repository Kubernetes sudo add-apt-repository "deb https://apt.kubernetes.io/ kubernetes-$(lsb_release -cs) main" sudo apt update sudo apt install kubelet kubeadm kubectl kubernetes-cni
+
+3. ## Master node init sudo sysctl net.bridge.bridge-nf-call-iptables=1  #해당 pod를 구성할 IP대역으로 구성 sudo kubeadm init --pod-network-cidr=20.96.0.0/12  !! 출력되서 나오는 로그 저장해둘것 kubeadm join 10.1.10.10:6443 --token ab8vm6.lytsy1k6k6ivb134 \     --discovery-token-ca-cert-hash sha256:f53e4177a64e695a040c32a2d4bdec24df996555c5a3cf98c965cb72b0d8427e  클러스터 설정파일 수정 및 환경변수 설정 mkdir -p $HOME/.kube sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+4. Pod Network 추가 Slave 노드들에 3번에서 저장해둔  kubeadm join 10.1.10.10:6443 --token ab8vm6.lytsy1k6k6ivb134 \     --discovery-token-ca-cert-hash sha256:f53e4177a64e695a040c32a2d4bdec24df996555c5a3cf98c965cb72b0d8427e 
+5. Node 연결 확인  MASTER 노드에서 확인 kubectl get nodes  
+6.  Kubernetes Cluster Networking에는 많은 Plugin들이 있는데 그중 Calico 설치에 대한 내용 입니다. Calico는 기본 192.168.0.0/16 대역으로 설치가 되는데, 그럼 실제 VM이 사용하고 있는 대역대와 겹치기 때문에 수정을 해서 설치해야 할 경우  curl -O https://docs.projectcalico.org/v3.9/manifests/calico.yaml sed s/192.168.0.0\\/16/20.96.0.0\\/12/g -i calico.yaml kubectl apply -f calico.yaml  calico와 coredns 관련 Pod의 Status가 Running인지 확인 (2분정도 소요) kubectl get pods --all-namespaces  
+7. Dashboard 설치  kubectl apply -f https://raw.githubusercontent.com/kubetm/kubetm.github.io/master/sample/practice/appendix/gcp-kubernetes-dashboard.yaml 
+8. Proxy로 백그라운드 띄우기  nohup kubectl proxy --port=8001 --address=10.1.10.10 --accept-hosts='^*$' >/dev/null 2>&1 &
+
+9. Dashboard 접속 http://10.1.10.10:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/.  
+10. Token 발급 kubectl -n kube-system describe $(kubectl -n kube-system  get secret -n kube-system -o name | grep namespace) | grep token
+
+
